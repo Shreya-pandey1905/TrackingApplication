@@ -1,15 +1,13 @@
 package com.Tracking.demo.serviceImpl;
 
 import com.Tracking.demo.dto.SubmissionRequest;
-import com.Tracking.demo.entity.Assignment;
-import com.Tracking.demo.entity.AssignmentStudent;
-import com.Tracking.demo.entity.Submission;
-import com.Tracking.demo.entity.SubmissionStatus;
+import com.Tracking.demo.entity.*;
 import com.Tracking.demo.exception.DuplicateResourceException;
 import com.Tracking.demo.exception.ResourceNotFoundException;
 import com.Tracking.demo.repository.AssignmentRepository;
 import com.Tracking.demo.repository.AssignmentStudentRepository;
 import com.Tracking.demo.repository.SubmissionRepository;
+import com.Tracking.demo.repository.UserRepository;
 import com.Tracking.demo.service.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,40 +26,54 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Autowired
     AssignmentStudentRepository assignmentStudentRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     @Override
-    public Submission submitAssignment(Long assignmentId, Long studentId, SubmissionRequest request) {
+    public Submission submitAssignment(Long assignmentId,Long studentId,SubmissionRequest request) {
         Assignment assignment=assignmentRepository.findById(assignmentId)
                 .orElseThrow(()->new ResourceNotFoundException("Assignment not found"));
-        AssignmentStudent assignmentStudent= assignmentStudentRepository.findByAssignmentIdAndStudentId(assignmentId,studentId);
+
+        AssignmentStudent assignmentStudent=
+                assignmentStudentRepository.findByAssignmentIdAndStudentId(assignmentId,studentId);
+
         if(assignmentStudent==null){
             throw new ResourceNotFoundException("Assignment is not assigned to this student");
         }
-        Submission oldSubmission=submissionRepository.findByAssignmentIdAndStudentId(assignmentId,studentId);
+
+        Submission oldSubmission=
+                submissionRepository.findByAssignmentIdAndStudentId(assignmentId,studentId);
+
         if(oldSubmission!=null){
             throw new DuplicateResourceException("Assignment already submitted");
         }
+
         if(LocalDateTime.now().isAfter(assignment.getDueDate())){
             throw new RuntimeException("Submission deadline has passed");
         }
+
+        User student=userRepository.findById(studentId)
+                .orElseThrow(()->new ResourceNotFoundException("Student not found"));
+
         Submission submission=new Submission();
-        submission.setAssignmentId(assignmentId);
-        submission.setStudentId(studentId);
+        submission.setAssignment(assignment);
+        submission.setStudent(student);
         submission.setSubmissionText(request.getSubmissionText());
         submission.setSubmittedAt(LocalDateTime.now());
         submission.setStatus(SubmissionStatus.SUBMITTED);
+
         return submissionRepository.save(submission);
     }
-
     @Override
-    public Submission updateSubmission(Long submissionId, Long studentId, SubmissionRequest request) {
+    public Submission updateSubmission(Long submissionId,Long studentId,SubmissionRequest request) {
         Submission submission=submissionRepository.findById(submissionId)
                 .orElseThrow(()->new ResourceNotFoundException("Submission not found"));
-
-        if(!submission.getStudentId().equals(studentId)){
+        if(!submission.getStudent().getId().equals(studentId)){
             throw new RuntimeException("You cannot update another student's submission");
         }
-        Assignment assignment=assignmentRepository.findById(submission.getAssignmentId())
+        Assignment assignment=assignmentRepository.findById(submission.getAssignment().getId())
                 .orElseThrow(()->new ResourceNotFoundException("Assignment not found"));
+
         if(LocalDateTime.now().isAfter(assignment.getDueDate())){
             throw new RuntimeException("Submission deadline has passed");
         }
@@ -72,7 +84,6 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setSubmittedAt(LocalDateTime.now());
         return submissionRepository.save(submission);
     }
-
 
     @Override
     public List<Submission> getStudentSubmissions(Long studentId) {

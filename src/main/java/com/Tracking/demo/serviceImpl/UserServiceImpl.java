@@ -173,22 +173,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void assignAssignmentToStudents(Long assignmentId, List<Long> studentIds) {
-        Assignment assignment = assignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
-
-        for (Long studentId : studentIds) {
-            User student = userRepository.findById(studentId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-
-            if (student.getRole() != Role.STUDENT) {
+    public void assignAssignmentToStudents(Long assignmentId,List<Long> studentIds) {
+        Assignment assignment=assignmentRepository.findById(assignmentId)
+                .orElseThrow(()->new ResourceNotFoundException("Assignment not found"));
+        for(Long studentId:studentIds){
+            User student=userRepository.findById(studentId)
+                    .orElseThrow(()->new ResourceNotFoundException("Student not found"));
+            if(student.getRole()!=Role.STUDENT){
                 throw new ResourceNotFoundException("Student not found");
             }
-            AssignmentStudent existing = assignmentStudentRepository.findByAssignmentIdAndStudentId(assignmentId,studentId);
-            if (existing == null) {
-                AssignmentStudent assignmentStudent = new AssignmentStudent();
-                assignmentStudent.setAssignmentId(assignmentId);
-                assignmentStudent.setStudentId(studentId);
+            AssignmentStudent existing=assignmentStudentRepository.findByAssignmentIdAndStudentId(assignmentId,studentId);
+
+            if(existing==null){
+                AssignmentStudent assignmentStudent=new AssignmentStudent();
+                assignmentStudent.setAssignment(assignment);
+                assignmentStudent.setStudent(student);
                 assignmentStudent.setAssignedAt(LocalDateTime.now());
                 assignmentStudentRepository.save(assignmentStudent);
             }
