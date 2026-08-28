@@ -1,8 +1,6 @@
 package com.Tracking.demo.controller;
 
-import com.Tracking.demo.dto.AssignmentRequest;
-import com.Tracking.demo.dto.AssignmentResponse;
-import com.Tracking.demo.dto.UserResponse;
+import com.Tracking.demo.dto.*;
 import com.Tracking.demo.entity.Assignment;
 import com.Tracking.demo.entity.AssignmentStatus;
 import com.Tracking.demo.entity.Submission;
@@ -14,6 +12,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -115,17 +115,14 @@ public class TrainerController {
 
     @PutMapping("/evaluateSubmission/{submissionId}")
     public ResponseEntity<ApiResponse<Submission>> evaluateSubmission(
-            @PathVariable("submissionId") Long submissionId,
-            @RequestParam("marks") Long marks,
-            @RequestParam("feedback") String feedback) {
-
-        Submission submission = userService.evaluateSubmission(submissionId,marks,feedback);
-        ApiResponse<Submission> response =ApiResponse.<Submission>builder()
-                        .success(true)
-                        .msg("Submission evaluated successfully")
-                        .data(submission)
-                        .build();
-
+            @PathVariable Long submissionId,
+            @Valid @RequestBody EvaluationRequest request) {
+        Submission submission = userService.evaluateSubmission(submissionId, request);
+        ApiResponse<Submission> response = ApiResponse.<Submission>builder()
+                .success(true)
+                .msg("Submission evaluated successfully")
+                .data(submission)
+                .build();
         return ResponseEntity.ok(response);
     }
 
@@ -142,6 +139,32 @@ public class TrainerController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(
+            @RequestBody ResetPasswordRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        userService.resetPassword(userDetails.getUsername(),request.getNewPassword());
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .success(true)
+                .msg("Password reset successfully done")
+                .data(null)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto request) {
+        LoginResponseDto response = userService.login(request);
+        ApiResponse<LoginResponseDto> apiResponse =
+                ApiResponse.<LoginResponseDto>builder()
+                        .success(true)
+                        .msg("Login successful..")
+                        .data(response)
+                        .build();
+        return ResponseEntity.ok(apiResponse);
+    }
+
 
 
 

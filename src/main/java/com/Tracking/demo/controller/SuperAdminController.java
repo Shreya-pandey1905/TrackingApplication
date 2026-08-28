@@ -1,11 +1,11 @@
 package com.Tracking.demo.controller;
 
-import com.Tracking.demo.dto.UserRequest;
-import com.Tracking.demo.dto.UserResponse;
+import com.Tracking.demo.dto.*;
 import com.Tracking.demo.entity.Assignment;
 import com.Tracking.demo.entity.Submission;
 import com.Tracking.demo.response.ApiResponse;
 import com.Tracking.demo.service.AssignmentService;
+import com.Tracking.demo.service.DashboardService;
 import com.Tracking.demo.service.SubmissionService;
 import com.Tracking.demo.service.UserService;
 import jakarta.validation.Valid;
@@ -29,6 +29,23 @@ public class SuperAdminController {
     @Autowired
     SubmissionService submissionService;
 
+    @Autowired
+    DashboardService dashboardService;
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<DashboardResponse>> getDashboard() {
+
+        DashboardResponse dashboard = dashboardService.getDashboard();
+
+        ApiResponse<DashboardResponse> response =
+                ApiResponse.<DashboardResponse>builder()
+                        .success(true)
+                        .msg("Dashboard fetched successfully")
+                        .data(dashboard)
+                        .build();
+
+        return ResponseEntity.ok(response);
+    }
     @PostMapping("/createAdmin")
     public ResponseEntity<ApiResponse<UserResponse>> createAdmin(@Valid @RequestBody UserRequest request) {
         UserResponse response = userService.createAdmin(request);
@@ -135,6 +152,18 @@ public class SuperAdminController {
                 .data(submissions)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto request) {
+        LoginResponseDto response = userService.login(request);
+        ApiResponse<LoginResponseDto> apiResponse =
+                ApiResponse.<LoginResponseDto>builder()
+                        .success(true)
+                        .msg("Login successful..")
+                        .data(response)
+                        .build();
+       return ResponseEntity.ok(apiResponse);
     }
 
 }

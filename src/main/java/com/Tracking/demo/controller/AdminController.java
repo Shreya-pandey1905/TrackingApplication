@@ -1,7 +1,6 @@
 package com.Tracking.demo.controller;
 
-import com.Tracking.demo.dto.AssignmentRequest;
-import com.Tracking.demo.dto.AssignmentResponse;
+import com.Tracking.demo.dto.*;
 import com.Tracking.demo.entity.Assignment;
 import com.Tracking.demo.entity.Submission;
 import com.Tracking.demo.repository.UserRepository;
@@ -9,10 +8,10 @@ import com.Tracking.demo.service.AssignmentService;
 import com.Tracking.demo.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.Tracking.demo.dto.UserRequest;
-import com.Tracking.demo.dto.UserResponse;
 import com.Tracking.demo.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +27,6 @@ public class AdminController {
 
     @Autowired
     AssignmentService assignmentService;
-
-
 
     @PostMapping("/createTrainer")
     public ResponseEntity<ApiResponse<UserResponse>> createTrainer(@Valid @RequestBody UserRequest request) {
@@ -150,4 +147,30 @@ public class AdminController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(
+            @RequestBody ResetPasswordRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        userService.resetPassword(userDetails.getUsername(),request.getNewPassword());
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .success(true)
+                .msg("Password reset successfully done")
+                .data(null)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto request) {
+        LoginResponseDto response = userService.login(request);
+        ApiResponse<LoginResponseDto> apiResponse =
+                ApiResponse.<LoginResponseDto>builder()
+                        .success(true)
+                        .msg("Login successful..")
+                        .data(response)
+                        .build();
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.Tracking.demo.repository;
 
 import com.Tracking.demo.entity.Submission;
+import com.Tracking.demo.entity.SubmissionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,5 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<Submission> findByAssignmentId(Long assignmentId);
 
     List<Submission> findByStudentId(Long studentId);
+    Long countByStatus(SubmissionStatus status);
 }
