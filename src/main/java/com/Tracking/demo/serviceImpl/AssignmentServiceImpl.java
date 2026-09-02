@@ -1,6 +1,7 @@
 package com.Tracking.demo.serviceImpl;
 import com.Tracking.demo.dto.AssignmentRequest;
 import com.Tracking.demo.dto.AssignmentResponse;
+import com.Tracking.demo.dto.UserResponse;
 import com.Tracking.demo.entity.Assignment;
 import com.Tracking.demo.entity.AssignmentStatus;
 import com.Tracking.demo.entity.AssignmentStudent;
@@ -26,16 +27,22 @@ public class AssignmentServiceImpl implements AssignmentService {
     UserRepository userRepository;
     @Autowired
     ModelMapper modelMapper;
-
     @Override
     public AssignmentResponse createAssignment(AssignmentRequest request) {
+
         Assignment assignment = modelMapper.map(request, Assignment.class);
+
+        assignment.setId(null);
+
         assignment.setTrainer(userRepository.findById(request.getTrainerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Trainer not found")));
+
         assignment.setStatus(AssignmentStatus.CREATED);
         assignment.setCreatedAt(LocalDateTime.now());
         assignment.setUpdatedAt(LocalDateTime.now());
+
         Assignment savedAssignment = assignmentRepository.save(assignment);
+
         return modelMapper.map(savedAssignment, AssignmentResponse.class);
     }
     @Override
@@ -43,10 +50,31 @@ public class AssignmentServiceImpl implements AssignmentService {
         return assignmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
     }
+//
+//    @Override
+//    public List<Assignment> getAllAssignments() {
+//        return assignmentRepository.findAll();
+//    }
 
     @Override
-    public List<Assignment> getAllAssignments() {
-        return assignmentRepository.findAll();
+    public List<AssignmentResponse> getAllAssignments() {
+
+        List<Assignment> assignments = assignmentRepository.findAll();
+        List<AssignmentResponse> responses = new ArrayList<>();
+        for (Assignment assignment : assignments) {
+            AssignmentResponse response = modelMapper.map(assignment, AssignmentResponse.class);
+            List<AssignmentStudent> assignmentStudents =
+                    assignmentStudentRepository.findByAssignmentId(assignment.getId());
+            List<UserResponse> students = new ArrayList<>();
+            for (AssignmentStudent assignmentStudent : assignmentStudents) {
+                UserResponse student =
+                        modelMapper.map(assignmentStudent.getStudent(), UserResponse.class);
+                students.add(student);
+            }
+            response.setAssignedStudents(students);
+            responses.add(response);
+        }
+        return responses;
     }
 
     @Override

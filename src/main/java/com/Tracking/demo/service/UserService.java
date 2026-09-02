@@ -33,4 +33,8 @@ public interface UserService {
 
     void resetPassword(String email, String newPassword);
 
+    void deleteTrainer(Long id);
+
+    void deleteStudent(Long id);
+
 }

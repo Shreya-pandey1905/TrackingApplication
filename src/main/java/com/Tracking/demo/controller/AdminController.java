@@ -108,6 +108,18 @@ public class AdminController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @GetMapping("/getAllAssignments")
+    public ResponseEntity<ApiResponse<List<AssignmentResponse>>> getAllAssignments() {
+        List<AssignmentResponse> assignments = assignmentService.getAllAssignments();
+        ApiResponse<List<AssignmentResponse>> response =
+                ApiResponse.<List<AssignmentResponse>>builder()
+                        .success(true)
+                        .msg("Assignments retrieved successfully")
+                        .data(assignments)
+                        .build();
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/closeAssignment/{id}")
     public ResponseEntity<ApiResponse<Assignment>> deleteAssignment(
             @PathVariable Long id) {
@@ -171,6 +183,18 @@ public class AdminController {
                         .data(response)
                         .build();
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @DeleteMapping("/trainers/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteTrainer(@PathVariable Long id) {
+        userService.deleteTrainer(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Trainer deleted successfully", null));
+    }
+
+    @DeleteMapping("/students/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteStudent(@PathVariable Long id) {
+        userService.deleteStudent(id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Student deleted successfully", null));
     }
 
 }

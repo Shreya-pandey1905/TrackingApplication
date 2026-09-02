@@ -12,7 +12,7 @@ import java.util.List;
 public interface AssignmentService {
     AssignmentResponse createAssignment(AssignmentRequest request);
     Assignment getAssignmentById(Long id);
-    List<Assignment> getAllAssignments();
+    List<AssignmentResponse> getAllAssignments();
     Assignment updateAssignment(Long id, AssignmentRequest request);
     void deleteAssignment(Long id);
 

@@ -31,6 +31,14 @@ public class SecurityConfig  {
         httpSecurity.csrf(csrf -> csrf.disable());
         httpSecurity.authorizeHttpRequests(request -> request
                 .requestMatchers(
+                        "/",
+                        "/login",
+                        "/css/**",
+                        "/js/**",
+                        "/super-admin/**",
+                        "/admin/**",
+                        "/trainer/**",
+                        "/student/**",
                         "/api/super-admin/login",
                         "/api/admin/login",
                         "/api/trainer/login",

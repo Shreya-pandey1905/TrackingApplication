@@ -218,6 +218,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteTrainer(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Trainer not found"));
+        if (user.getRole() != Role.TRAINER) {
+            throw new ResourceNotFoundException("Trainer not found");
+        }
+        user.setActive(false);
+        userRepository.save(user);    }
+
+    @Override
+    public void deleteStudent(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        if (user.getRole() != Role.STUDENT) {
+            throw new ResourceNotFoundException("Student not found");
+        }
+        user.setActive(false);
+        userRepository.save(user);    }
+
+    @Override
     public LoginResponseDto login(LoginRequestDto request) {
         try {
             authenticationManager.authenticate(UsernamePasswordAuthenticationToken.unauthenticated(

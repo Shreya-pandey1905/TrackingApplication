@@ -55,16 +55,16 @@ public class TrainerController {
 
 
     @GetMapping("/getAssignedAndCreatedAssignments")
-    public ResponseEntity<ApiResponse<List<Assignment>>> getActiveAssignments() {
-        List<Assignment> assignments = assignmentService.getAllAssignments();
-        List<Assignment> filteredAssignments = new ArrayList<>();
-        for (Assignment assignment : assignments) {
+    public ResponseEntity<ApiResponse<List<AssignmentResponse>>> getActiveAssignments() {
+        List<AssignmentResponse> assignments = assignmentService.getAllAssignments();
+        List<AssignmentResponse> filteredAssignments = new ArrayList<>();
+        for (AssignmentResponse assignment : assignments) {
             if (assignment.getStatus() == AssignmentStatus.CREATED || assignment.getStatus() == AssignmentStatus.ASSIGNED) {
                 filteredAssignments.add(assignment);
             }
         }
-        ApiResponse<List<Assignment>> apiResponse =
-                ApiResponse.<List<Assignment>>builder()
+        ApiResponse<List<AssignmentResponse>> apiResponse =
+                ApiResponse.<List<AssignmentResponse>>builder()
                         .success(true)
                         .msg("Assigned and created assignments retrieved successfully")
                         .data(filteredAssignments)

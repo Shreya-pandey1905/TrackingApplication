@@ -133,14 +133,14 @@ public class SuperAdminController {
     }
 
     @GetMapping("/getAllAssignments")
-    public ResponseEntity<ApiResponse<List<Assignment>>> getAllAssignments() {
-        List<Assignment> assignments = assignmentService.getAllAssignments();
-        ApiResponse<List<Assignment>> apiResponse = ApiResponse.<List<Assignment>>builder()
+    public ResponseEntity<ApiResponse<List<AssignmentResponse>>> getAllAssignments() {
+        List<AssignmentResponse> assignments = assignmentService.getAllAssignments();
+        ApiResponse<List<AssignmentResponse>> apiResponse = ApiResponse.<List<AssignmentResponse>>builder()
                 .success(true)
                 .msg("Assignments retrieved successfully")
                 .data(assignments)
                 .build();
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 
     @GetMapping("/viewAllSubmissions")
