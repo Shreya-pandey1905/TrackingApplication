@@ -1,0 +1,9 @@
+<div th:fragment="search(inputId, placeholder)" class="search-bar">
+    <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control" th:id="${inputId}" th:placeholder="${placeholder}" autocomplete="off">
+        <button type="button" class="btn btn-outline-secondary btn-clear-search" th:attr="data-target=${inputId}" title="Clear search">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+</div>

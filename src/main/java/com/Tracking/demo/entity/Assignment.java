@@ -26,9 +26,6 @@ public class Assignment {
     private Long maxMarks;
     @Enumerated(EnumType.STRING)
     private AssignmentStatus status;
-//    //todo: onr to many
-//    private Long trainerId;
-
     @ManyToOne
     @JoinColumn(name = "trainer_id")
     private User trainer;

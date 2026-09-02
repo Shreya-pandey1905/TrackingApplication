@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,6 +24,7 @@ public class AssignmentResponse {
     private Long maxMarks;
     private AssignmentStatus status;
     private Long trainerId;
+    private List<UserResponse> assignedStudents;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Submissions')}"></head>
+<body>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+<button class="btn btn-primary mobile-toggle" id="sidebar-toggle"><i class="bi bi-list"></i></button>
+<div class="app-layout">
+    <div th:replace="~{fragments/sidebar-admin :: sidebar}"></div>
+    <main class="main-content">
+        <div class="page-header"><h1>Submissions</h1><p>View submissions by assignment</p></div>
+        <div class="content-card mb-3" style="max-width: 480px;">
+            <label class="form-label">Select Assignment</label>
+            <select class="form-select" id="assignment-select" onchange="loadSubmissions()">
+                <option value="">-- Choose an assignment --</option>
+            </select>
+        </div>
+        <div class="content-card">
+            <div th:replace="~{fragments/search-bar :: search('table-search', 'Search by student, feedback or status...')}"></div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Student</th><th>Submitted</th><th>Marks</th><th>Feedback</th><th>Status</th></tr></thead>
+                    <tbody id="submissions-table"><tr><td colspan="5" class="text-center text-muted">Select an assignment to view submissions</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/auth.js}"></script>
+<script th:src="@{/js/api.js}"></script>
+<script>
+    requireAuth('ADMIN');
+    initSidebar('ADMIN');
+    let allSubmissions = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res = await AdminApi.getAllAssignments();
+            const select = document.getElementById('assignment-select');
+            (res.data || []).forEach(a => {
+                select.innerHTML += `<option value="${a.id}">${a.title}</option>`;
+            });
+        } catch (err) { showAlert(err.message, 'danger'); }
+        initSearch('table-search', q => renderSubmissions(filterItems(allSubmissions, q, s =>
+            `${s.student ? s.student.name : ''} ${s.feedback || ''} ${s.status || ''}`)));
+    });
+
+    function renderSubmissions(list) {
+        const tbody = document.getElementById('submissions-table');
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No submissions found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = list.map(s => `
+            <tr>
+                <td>${s.student ? s.student.name : '-'}</td>
+                <td>${formatDate(s.submittedAt)}</td>
+                <td>${s.marks != null ? s.marks : '-'}</td>
+                <td>${s.feedback || '-'}</td>
+                <td>${statusBadge(s.status)}</td>
+            </tr>`).join('');
+    }
+
+    async function loadSubmissions() {
+        const id = document.getElementById('assignment-select').value;
+        if (!id) return;
+        try {
+            const res = await AdminApi.getSubmissions(id);
+            allSubmissions = res.data || [];
+            const q = document.getElementById('table-search')?.value || '';
+            renderSubmissions(filterItems(allSubmissions, q, s =>
+                `${s.student ? s.student.name : ''} ${s.feedback || ''} ${s.status || ''}`));
+        } catch (err) { showAlert(err.message, 'danger'); }
+    }
+</script>
+</body>
+</html>

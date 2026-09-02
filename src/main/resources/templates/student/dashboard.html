@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Dashboard')}"></head>
+<body>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+<button class="btn btn-primary mobile-toggle" id="sidebar-toggle"><i class="bi bi-list"></i></button>
+<div class="app-layout">
+    <div th:replace="~{fragments/sidebar-student :: sidebar}"></div>
+    <main class="main-content">
+        <div class="page-header"><h1>Dashboard</h1><p>Welcome back, <span id="welcome-name"></span></p></div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <a href="/student/assignments" class="stat-card-link">
+                    <div class="stat-card stat-card-nav">
+                        <div class="stat-value" id="stat-assignments">-</div>
+                        <div class="stat-label">My Assignments</div>
+                        <span class="stat-nav-btn">View <i class="bi bi-arrow-right"></i></span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="/student/submissions" class="stat-card-link">
+                    <div class="stat-card stat-card-nav">
+                        <div class="stat-value" id="stat-submissions">-</div>
+                        <div class="stat-label">My Submissions</div>
+                        <span class="stat-nav-btn">View <i class="bi bi-arrow-right"></i></span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/auth.js}"></script>
+<script th:src="@{/js/api.js}"></script>
+<script>
+    requireAuth('STUDENT');
+    initSidebar('STUDENT');
+    const studentId = getUser().id;
+    document.getElementById('welcome-name').textContent = getUser().name;
+    Promise.all([
+        StudentApi.getAssignments(studentId),
+        StudentApi.getSubmissions(studentId)
+    ]).then(([a, s]) => {
+        document.getElementById('stat-assignments').textContent = a.data?.length ?? 0;
+        document.getElementById('stat-submissions').textContent = s.data?.length ?? 0;
+    }).catch(err => showAlert(err.message, 'danger'));
+</script>
+</body>
+</html>
